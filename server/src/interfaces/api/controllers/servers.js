@@ -34,6 +34,7 @@ async function getServer(req, res) {
     server.channels = await serversService.getServerChannels(serverId);
     server.settings = await settingsService.getSettings(serverId);
     server.limits = await limitsService.getLimits(serverId);
+    server.subscription = await subscriptionsService.getSubscriptionByServerId(serverId);
     server.track = await trackService.getTrack(serverId);
 
     return res.send(server);

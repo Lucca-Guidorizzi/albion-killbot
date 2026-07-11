@@ -1,10 +1,12 @@
 import LoadError from "components/LoadError";
 import TrackEmptyState from "components/dashboard/TrackEmptyState";
+import TrackSlotsSummary from "components/dashboard/TrackSlotsSummary";
 import UnsavedChangesBar from "components/dashboard/UnsavedChangesBar";
 import Loader from "components/common/Loader";
 import Search from "components/Search";
 import TrackList from "components/TrackList";
 import { useAppDispatch, useAppSelector } from "helpers/hooks";
+import { isSubscriptionActive } from "helpers/subscriptions";
 import { useEffect } from "react";
 import { Alert, Card, Stack } from "react-bootstrap";
 import { Link, useParams } from "react-router-dom";
@@ -34,10 +36,7 @@ const TrackPage = () => {
     (limits?.players && track.players.length > limits.players) ||
     (limits?.guilds && track.guilds.length > limits.guilds) ||
     (limits?.alliances && track.alliances.length > limits.alliances);
-  const isPremium =
-    subscription &&
-    (subscription.expires === "never" ||
-      new Date(subscription.expires).getTime() > new Date().getTime());
+  const isPremium = Boolean(subscription && isSubscriptionActive(subscription));
   const hasNoConfiguredTrackChannels =
     !settings.kills.channel &&
     !settings.deaths.channel &&
@@ -46,8 +45,6 @@ const TrackPage = () => {
     track.players.length === 0 &&
     track.guilds.length === 0 &&
     track.alliances.length === 0;
-  const totalTracked =
-    track.players.length + track.guilds.length + track.alliances.length;
   const trackSections = [
     { type: TRACK_TYPE.PLAYERS, limit: limits.players, list: track.players },
     { type: TRACK_TYPE.GUILDS, limit: limits.guilds, list: track.guilds },
@@ -89,15 +86,13 @@ const TrackPage = () => {
         </Alert>
       )}
 
-      <Search limits={limits} />
+      <Search limits={limits} isPremium={isPremium} />
 
       <Card className="tracked-entities-card">
-        {!emptyList && (
-          <Card.Header className="tracked-entities-card-header d-flex justify-content-between align-items-center py-2">
-            <span>Tracked entities</span>
-            <span className="text-muted small">{totalTracked} total</span>
-          </Card.Header>
-        )}
+        <Card.Header className="tracked-entities-card-header d-flex justify-content-between align-items-center flex-wrap gap-2 py-2">
+          <span>Tracked entities</span>
+          <TrackSlotsSummary limits={limits} />
+        </Card.Header>
 
         <Stack gap={3} className="p-2">
           {trackSections.map(({ type, limit, list }) => (

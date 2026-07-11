@@ -65,6 +65,8 @@ router.use(`/:serverId`, serverAdmin);
  *              $ref: "#/components/schemas/Limits"
  *            settings:
  *              $ref: '#/components/schemas/Settings'
+ *            subscription:
+ *              $ref: '#/components/schemas/Subscription'
  *            track:
  *              $ref: '#/components/schemas/Track'
  *

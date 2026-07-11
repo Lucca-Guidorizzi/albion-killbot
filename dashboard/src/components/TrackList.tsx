@@ -20,12 +20,10 @@ const TrackList = ({ type, limit = 0, list }: ITrackListItemProps) => {
     <ListGroup className="entity-list entity-list--tracked">
       <ListGroup.Item
         variant="secondary"
-        className="entity-list-header d-flex justify-content-between align-items-baseline"
+        className="entity-list-header d-flex align-items-baseline gap-2"
       >
         <div>{capitalize(type)}</div>
-        <Badge bg={list.length < limit ? "secondary" : "danger"}>
-          {list.length}/{limit}
-        </Badge>
+        <Badge bg="secondary">{list.length}</Badge>
       </ListGroup.Item>
 
       {list.map((item, i) => {

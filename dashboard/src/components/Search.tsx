@@ -10,9 +10,10 @@ import Loader from "./common/Loader";
 
 interface ISearchProps {
   limits: Limits;
+  isPremium?: boolean;
 }
 
-const Search = ({ limits }: ISearchProps) => {
+const Search = ({ limits, isPremium }: ISearchProps) => {
   const constants = useGetConstantsQuery();
   const [query, setQuery] = useState("");
   const [server, setServer] = useState<IAlbionServer>();
@@ -103,6 +104,7 @@ const Search = ({ limits }: ISearchProps) => {
             ) : (
               <SearchResults
                 limits={limits}
+                isPremium={isPremium}
                 searchResults={searchResults.data}
               />
             )}

@@ -1,22 +1,32 @@
 import { useAppDispatch, useAppSelector } from "helpers/hooks";
+import { useState } from "react";
 import { Stack } from "react-bootstrap";
 import { addToast } from "store/toast";
 import { trackAlliance, trackGuild, trackPlayer } from "store/track";
 import { Limits } from "types/limits";
 import { ISearchResults } from "types/track";
+import PremiumAdModal from "./PremiumAdModal";
 import SearchResultsList from "./SearchResultsList";
 
 interface ISearchResultsProps {
   limits: Limits;
+  isPremium?: boolean;
   searchResults?: ISearchResults;
 }
 
-const SearchResults = ({ limits, searchResults }: ISearchResultsProps) => {
+const SearchResults = ({
+  limits,
+  isPremium = false,
+  searchResults,
+}: ISearchResultsProps) => {
   const track = useAppSelector((state) => state.track);
   const dispatch = useAppDispatch();
+  const [showPremiumAd, setShowPremiumAd] = useState(false);
 
-  const showError = (message: string) =>
+  const showLimitExceeded = (message: string) => {
+    if (!isPremium) return setShowPremiumAd(true);
     dispatch(addToast({ theme: "danger", message }));
+  };
 
   const showSaveReminder = () =>
     dispatch(
@@ -30,7 +40,7 @@ const SearchResults = ({ limits, searchResults }: ISearchResultsProps) => {
     const limit = limits.players || 0;
 
     if (track.players.length >= limit)
-      return showError(`Maximum limit of ${limit} player(s) exceeded.`);
+      return showLimitExceeded(`Maximum limit of ${limit} player(s) exceeded.`);
     dispatch(trackPlayer(player));
     showSaveReminder();
   };
@@ -39,7 +49,7 @@ const SearchResults = ({ limits, searchResults }: ISearchResultsProps) => {
     const limit = limits.guilds || 0;
 
     if (track.guilds.length >= limit)
-      return showError(`Maximum limit of ${limit} guild(s) exceeded.`);
+      return showLimitExceeded(`Maximum limit of ${limit} guild(s) exceeded.`);
     dispatch(trackGuild(guild));
     showSaveReminder();
   };
@@ -48,7 +58,9 @@ const SearchResults = ({ limits, searchResults }: ISearchResultsProps) => {
     const limit = limits.alliances || 0;
 
     if (track.alliances.length >= limit)
-      return showError(`Maximum limit of ${limit} alliances(s) exceeded.`);
+      return showLimitExceeded(
+        `Maximum limit of ${limit} alliances(s) exceeded.`
+      );
     dispatch(trackAlliance(alliance));
     showSaveReminder();
   };
@@ -93,6 +105,11 @@ const SearchResults = ({ limits, searchResults }: ISearchResultsProps) => {
           onTrackClick={(e, item) => doTrackAlliance(item)}
         />
       )}
+
+      <PremiumAdModal
+        show={showPremiumAd}
+        onClose={() => setShowPremiumAd(false)}
+      />
     </Stack>
   );
 };
