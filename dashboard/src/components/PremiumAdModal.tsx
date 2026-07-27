@@ -88,8 +88,8 @@ const PremiumAdModal = ({ show, onClose }: IPremiumAdModalProps) => {
           </AdEyebrow>
           <AdTitle>You are out of tracking slots</AdTitle>
           <AdText>
-            You have reached the free tracking limit for this server. Upgrade
-            to Premium to unlock:
+            You have reached the free tracking limit for this server. Upgrade to
+            Premium to unlock:
           </AdText>
           <AdFeatures>
             <li>

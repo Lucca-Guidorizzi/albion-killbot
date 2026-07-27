@@ -23,7 +23,11 @@ import {
 import { IConstants } from "types/constants";
 import { IChannel } from "types/server";
 
-export type NotificationSettingsType = "kills" | "assists" | "deaths" | "depths";
+export type NotificationSettingsType =
+  | "kills"
+  | "assists"
+  | "deaths"
+  | "depths";
 
 interface NotificationSettingsFormProps {
   type: NotificationSettingsType;

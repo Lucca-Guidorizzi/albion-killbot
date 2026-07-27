@@ -72,8 +72,7 @@ const HOME_FEATURES: HomeFeature[] = [
     premium: true,
     name: "Depths Kills",
     icon: faDungeon,
-    description:
-      "Premium notifications for kills that happened in Depths.",
+    description: "Premium notifications for kills that happened in Depths.",
   },
   {
     name: "Battles",
