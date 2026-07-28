@@ -1,7 +1,8 @@
 const { isEventSoftCapped } = require("./itemPower");
 
-// Depths gear is soft-capped at 1200 item power, with only 20% of power above that
-// threshold counting toward the reported AverageItemPower.
+// Depths gear (including any TRAIT_ITEM_POWER bonus from an awakened weapon) is soft-capped
+// at 1200 item power, with only 20% of power above that threshold counting toward the
+// reported AverageItemPower.
 const DEPTHS_SOFTCAP = 1200;
 const DEPTHS_SOFTCAP_RATE = 0.2;
 

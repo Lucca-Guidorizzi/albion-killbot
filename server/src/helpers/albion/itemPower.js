@@ -25,9 +25,20 @@ function parseItemPower(item) {
   return basePower + Number(enchant || 0) * 100 + qualityBonus;
 }
 
+// Awakened/attuned weapons can roll a TRAIT_ITEM_POWER trait on their LegendarySoul, adding
+// power that isn't reflected in the static item power table above.
+function parseTraitItemPower(item) {
+  if (!item?.LegendarySoul?.traits) return 0;
+
+  return item.LegendarySoul.traits
+    .filter((trait) => trait.trait === "TRAIT_ITEM_POWER")
+    .reduce((sum, trait) => sum + trait.value, 0);
+}
+
 // Computes the "raw" (uncompressed) average item power for a set of equipment, mirroring
 // the game's own AverageItemPower calc: averaged over 6 gear slots, with a two-handed
-// weapon's power counted for both MainHand and OffHand.
+// weapon's power (and any TRAIT_ITEM_POWER bonus it carries) counted for both MainHand and
+// OffHand.
 function computeRawItemPower(equipment) {
   if (!equipment) return null;
 
@@ -38,14 +49,14 @@ function computeRawItemPower(equipment) {
   for (const slot of EQUIPMENT_SLOTS) {
     const item = slot === "OffHand" && !equipment.OffHand && isTwoHanded ? mainHand : equipment[slot];
     const power = parseItemPower(item);
-    if (power === null) continue;
-    total += power;
+    if (power !== null) total += power;
+    total += parseTraitItemPower(item);
   }
 
   return total / EQUIPMENT_SLOTS.length + MASTERY_BONUS_OFFSET;
 }
 
-function isPlayerSoftCapped(player, softcap, threshold, tolerance, minGap) {
+function isPlayerSoftCapped(player, { softcap, threshold, tolerance, minGap }) {
   if (!player || typeof player.AverageItemPower !== "number") return false;
 
   const rawPower = computeRawItemPower(player.Equipment);
@@ -63,8 +74,9 @@ function isPlayerSoftCapped(player, softcap, threshold, tolerance, minGap) {
 // Checks whether an event's item power looks compressed by a soft-cap curve:
 //   effectivePower = softcap + max(0, rawPower - softcap) * threshold
 // Used to detect low-risk zones (e.g. Depths) where high-IP gear gets scaled down for
-// AverageItemPower reporting purposes. Checks both the killer and the victim, since
-// either side can be the one wearing gear above the cap.
+// AverageItemPower reporting purposes. Checks the killer, victim, and any other
+// participants, since the softcap is a property of the map itself: if any one of them
+// is soft-capped, the whole event happened in a soft-capped zone.
 //
 // softcap: item power above which compression kicks in (e.g. 1200)
 // threshold: fraction of power above the cap that still counts (e.g. 0.2 for 20%)
@@ -73,10 +85,9 @@ function isPlayerSoftCapped(player, softcap, threshold, tolerance, minGap) {
 //   to rule out uncompressed players just above the cap (see isPlayerSoftCapped)
 function isEventSoftCapped(event, softcap, threshold, tolerance = 50, minGap = 100) {
   if (!event) return false;
-  return (
-    isPlayerSoftCapped(event.Killer, softcap, threshold, tolerance, minGap) ||
-    isPlayerSoftCapped(event.Victim, softcap, threshold, tolerance, minGap)
-  );
+  const params = { softcap, threshold, tolerance, minGap };
+  const participants = [event.Killer, event.Victim, ...(event.Participants || [])];
+  return participants.some((participant) => isPlayerSoftCapped(participant, params));
 }
 
 module.exports = {
